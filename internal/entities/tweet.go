@@ -1,7 +1,21 @@
 package entities
 
-import valueobjects "github.com/harlancleiton/go-tweets/pkg/value_objects"
+import (
+	"time"
+
+	valueobjects "github.com/harlancleiton/go-tweets/pkg/value_objects"
+)
 
 type Tweet struct {
-	ID valueobjects.EntityID
+	ID        valueobjects.EntityID
+	Text      string
+	CreatedAt time.Time
+}
+
+func NewTweet(text string) (*Tweet, error) {
+	return &Tweet{
+		ID:        valueobjects.NewEntityID(),
+		Text:      text,
+		CreatedAt: time.Now(),
+	}, nil
 }
