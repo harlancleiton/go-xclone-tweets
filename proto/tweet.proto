@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "pkg/pb";
+
+message CreateTweetRequest {
+    string text = 1;
+}
+
+message TweetResponse {
+    string id = 1;
+    string text = 2;
+    string created_at = 3;
+}
+
+service TweetService {
+  rpc Create(CreateTweetRequest) returns (TweetResponse);
+}
