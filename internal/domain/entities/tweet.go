@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	valueobjects "github.com/harlancleiton/go-tweets/pkg/value_objects"
+	valueobjects "github.com/harlancleiton/go-tweets/pkg/domain/value_objects"
 )
 
 type Tweet struct {

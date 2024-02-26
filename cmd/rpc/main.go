@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/harlancleiton/go-tweets/internal/dto"
-	"github.com/harlancleiton/go-tweets/internal/usecases"
+	"github.com/harlancleiton/go-tweets/internal/domain/dto"
+	"github.com/harlancleiton/go-tweets/internal/domain/usecases"
 	"github.com/harlancleiton/go-tweets/pkg/pb"
 	"google.golang.org/grpc"
 )

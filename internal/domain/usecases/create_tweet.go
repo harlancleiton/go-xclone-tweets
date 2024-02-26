@@ -3,8 +3,8 @@ package usecases
 import (
 	"context"
 
-	"github.com/harlancleiton/go-tweets/internal/dto"
-	"github.com/harlancleiton/go-tweets/internal/entities"
+	"github.com/harlancleiton/go-tweets/internal/domain/dto"
+	"github.com/harlancleiton/go-tweets/internal/domain/entities"
 )
 
 type CreateTweet struct{}
