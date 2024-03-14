@@ -7,15 +7,34 @@ import (
 )
 
 type Tweet struct {
-	ID        valueobjects.EntityID
-	Text      string
-	CreatedAt time.Time
+	BaseEntity
+	text   string
+	author Author
 }
 
-func NewTweet(text string) (*Tweet, error) {
+func NewTweet(text string, author Author) (*Tweet, error) {
+	// TODO add validation
+	entityId, err := valueobjects.NewEntityID()
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &Tweet{
-		ID:        valueobjects.NewEntityID(),
-		Text:      text,
-		CreatedAt: time.Now(),
+		BaseEntity: BaseEntity{
+			id:        *entityId,
+			createdAt: time.Now(),
+			updatedAt: time.Now(),
+		},
+		text:   text,
+		author: author,
 	}, nil
+}
+
+func (t *Tweet) Text() string {
+	return t.text
+}
+
+func (t *Tweet) Author() Author {
+	return t.author
 }

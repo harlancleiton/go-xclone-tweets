@@ -15,8 +15,14 @@ type EntityID struct {
 }
 
 // NewEntityID generates a new EntityID with a random UUID.
-func NewEntityID() EntityID {
-	return EntityID{uuid: uuid.New()}
+func NewEntityID() (*EntityID, error) {
+	uuid, err := uuid.NewV7()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &EntityID{uuid}, nil
 }
 
 // NewEntityIDFromString creates a new EntityID from a UUID given as a string.

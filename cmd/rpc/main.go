@@ -5,22 +5,23 @@ import (
 	"log"
 	"net"
 
+	"github.com/harlancleiton/go-tweets/internal/application/services"
 	"github.com/harlancleiton/go-tweets/internal/domain/dto"
-	"github.com/harlancleiton/go-tweets/internal/domain/usecases"
+	infra "github.com/harlancleiton/go-tweets/internal/infra/persistence/memory"
 	"github.com/harlancleiton/go-tweets/pkg/pb"
 	"google.golang.org/grpc"
 )
 
 type TweetServiceServerAdapter struct {
-	createTweet *usecases.CreateTweet
+	tweetService *services.TweetService
 	pb.UnimplementedTweetServiceServer
 }
 
 func (adapter *TweetServiceServerAdapter) Create(ctx context.Context, request *pb.CreateTweetRequest) (*pb.TweetResponse, error) {
-	input := dto.CreateTweetInput{
+	input := &dto.CreateTweetInput{
 		Text: request.Text,
 	}
-	tweet, err := adapter.createTweet.Execute(ctx, input)
+	tweet, err := adapter.tweetService.CreateTweet("username", input)
 
 	if err != nil {
 		return nil, err
@@ -33,17 +34,22 @@ func (adapter *TweetServiceServerAdapter) Create(ctx context.Context, request *p
 	}, nil
 }
 
-func NewTweetServiceServerAdapter(createTweet *usecases.CreateTweet) *TweetServiceServerAdapter {
+func NewTweetServiceServerAdapter(tweetService *services.TweetService) *TweetServiceServerAdapter {
 	return &TweetServiceServerAdapter{
-		createTweet: createTweet,
+		tweetService: tweetService,
 	}
+}
+
+func registerTweetServiceServer(server *grpc.Server) {
+	service := services.NewTweetService(infra.NewMemoryUserRepository(), infra.NewMemoryTweetRepository())
+	pb.RegisterTweetServiceServer(server, NewTweetServiceServerAdapter(service))
 }
 
 func main() {
 	options := []grpc.ServerOption{}
 	server := grpc.NewServer(options...)
 
-	pb.RegisterTweetServiceServer(server, NewTweetServiceServerAdapter(usecases.NewCreateTweet()))
+	registerTweetServiceServer(server)
 
 	listener, err := net.Listen("tcp", "localhost:50051")
 
