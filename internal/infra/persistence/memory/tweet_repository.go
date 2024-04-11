@@ -1,4 +1,4 @@
-package infra
+package memory
 
 import (
 	"context"
@@ -13,7 +13,7 @@ type MemoryTweetRepository struct {
 
 func (r *MemoryTweetRepository) Save(ctx context.Context, tweet *entities.Tweet) error {
 	select {
-	case <-time.After(1 * time.Second):
+	case <-time.After(200 * time.Millisecond):
 		r.tweets = append(r.tweets, tweet)
 		return nil
 	case <-ctx.Done():
