@@ -86,7 +86,7 @@ func authorize(ctx context.Context, userRepository repositories.UserRepository) 
 		return nil, ErrInternal
 	}
 
-	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(time.Second*2))
+	ctx, cancel := context.WithTimeout(ctx, time.Second*2)
 	defer cancel()
 	return userRepository.FindByUsername(ctx, claims.Subject)
 }
