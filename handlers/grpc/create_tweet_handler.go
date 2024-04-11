@@ -38,6 +38,10 @@ func NewTweetResponse(tweet *dto.TweetDto) *pb.TweetResponse {
 		Id:        tweet.ID,
 		Text:      tweet.Text,
 		CreatedAt: tweet.CreatedAt.String(),
+		Author: &pb.AuthorResponse{
+			ID:       tweet.Author.ID,
+			Username: tweet.Author.Username,
+		},
 	}
 }
 

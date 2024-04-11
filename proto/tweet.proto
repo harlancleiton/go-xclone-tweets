@@ -6,10 +6,16 @@ message CreateTweetRequest {
     string text = 1;
 }
 
+message AuthorResponse {
+  string id = 1;
+  string username = 2;
+}
+
 message TweetResponse {
     string id = 1;
     string text = 2;
     string created_at = 3;
+    AuthorResponse author = 4;
 }
 
 service TweetService {
