@@ -8,7 +8,7 @@ import (
 	grpcHandler "github.com/harlancleiton/go-tweets/handlers/grpc"
 	"github.com/harlancleiton/go-tweets/internal/application/services"
 	"github.com/harlancleiton/go-tweets/internal/infra/persistence/memory"
-	grpcInterceptor "github.com/harlancleiton/go-tweets/middlewares/grpc"
+	grpcInterceptor "github.com/harlancleiton/go-tweets/pkg/middlewares/grpc"
 	"github.com/harlancleiton/go-tweets/pkg/pb"
 	"google.golang.org/grpc"
 )

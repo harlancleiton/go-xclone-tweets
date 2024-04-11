@@ -6,7 +6,7 @@ import (
 	"github.com/harlancleiton/go-tweets/internal/application/services"
 	"github.com/harlancleiton/go-tweets/internal/domain/dto"
 	"github.com/harlancleiton/go-tweets/internal/domain/entities"
-	grpcInterceptor "github.com/harlancleiton/go-tweets/middlewares/grpc"
+	grpcInterceptor "github.com/harlancleiton/go-tweets/pkg/middlewares/grpc"
 	"github.com/harlancleiton/go-tweets/pkg/pb"
 )
 
