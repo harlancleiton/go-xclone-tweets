@@ -1,4 +1,4 @@
-package infra
+package memory
 
 import (
 	"context"
@@ -28,7 +28,7 @@ func (r *MemoryUserRepository) FindByUsername(ctx context.Context, username stri
 }
 
 func NewMemoryUserRepository() *MemoryUserRepository {
-	user, err := entities.NewUserFromExisting(faker.UUIDHyphenated(), "username", time.Now(), time.Now(), false, true)
+	user, err := entities.NewUserFromExisting(faker.UUIDHyphenated(), "somebody", time.Now(), time.Now(), false, true)
 
 	if err != nil {
 		panic(err)
