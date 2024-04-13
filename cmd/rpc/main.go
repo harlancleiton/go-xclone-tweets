@@ -14,17 +14,27 @@ import (
 )
 
 func main() {
+	log.Println("Starting gRPC server...")
+
 	authInterceptor := grpcInterceptor.NewAuthInterceptor(memory.NewMemoryUserRepository())
 	options := []grpc.ServerOption{grpc.UnaryInterceptor(authInterceptor.Unary())}
 	server := grpc.NewServer(options...)
 
+	log.Println("gRPC server started")
+
 	registerTweetServiceServer(server)
 
-	listener, err := net.Listen("tcp", "localhost:50051")
+	log.Println("TweetService registered")
+	log.Println("All services registered")
+
+	address := "0.0.0.0:50051"
+	listener, err := net.Listen("tcp", address)
 
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
+
+	log.Println("Listening on", address)
 
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
