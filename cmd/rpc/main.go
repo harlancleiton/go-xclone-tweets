@@ -4,7 +4,10 @@ import (
 	"context"
 	"log"
 	"net"
+	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	grpcHandler "github.com/harlancleiton/go-tweets/handlers/grpc"
 	"github.com/harlancleiton/go-tweets/internal/application/services"
 	"github.com/harlancleiton/go-tweets/internal/infra/persistence/memory"
@@ -14,6 +17,8 @@ import (
 )
 
 func main() {
+	generateAccessToken()
+
 	log.Println("Starting gRPC server...")
 
 	authInterceptor := grpcInterceptor.NewAuthInterceptor(memory.NewMemoryUserRepository())
@@ -55,4 +60,23 @@ func registerTweetServiceServer(server *grpc.Server) {
 	pb.RegisterTweetServiceServer(server, &TweetService{
 		createHandler: grpcHandler.NewGrpcCreateTweetHandler(service),
 	})
+}
+
+func generateAccessToken() {
+	claims := jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
+		Issuer:    "tweets",
+		Subject:   "somebody",
+		Audience:  strings.Join(([]string{"somebody_else"}), ", "),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	mySigningKey := []byte("secret")
+	ss, err := token.SignedString(mySigningKey)
+
+	if err != nil {
+		log.Fatalf("Failed to generate token: %v", err)
+	}
+
+	log.Println("generated token:", ss)
 }
