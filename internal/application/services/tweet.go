@@ -8,12 +8,14 @@ import (
 	"github.com/harlancleiton/go-tweets/internal/domain/entities"
 	"github.com/harlancleiton/go-tweets/internal/domain/repositories"
 	"github.com/harlancleiton/go-tweets/internal/domain/services"
+	"github.com/harlancleiton/go-tweets/pkg/domain/events"
 )
 
 type TweetService struct {
 	tweetService    *services.TweetService
 	userRepository  repositories.UserRepository
 	tweetRepository repositories.TweetRepository
+	dispatcher      events.EventDispatcher
 }
 
 func (s *TweetService) CreateTweet(username string, input *dto.CreateTweetInput) (*dto.TweetDto, error) {
@@ -25,31 +27,35 @@ func (s *TweetService) CreateTweet(username string, input *dto.CreateTweetInput)
 		return nil, err
 	}
 
-	tweet, err := entities.NewTweet(input.Text, *author)
+	f := entities.NewTweetFactory(s.dispatcher)
+	t, err := f.CreateNewTweet(input.Text, author)
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.tweetService.Tweet(author, tweet)
+	err = s.tweetService.Tweet(author, t)
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.tweetRepository.Save(ctx, tweet)
+	err = s.tweetRepository.Save(ctx, t)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return dto.NewTweetDto(tweet), nil
+	t.Commit()
+
+	return dto.NewTweetDto(t), nil
 }
 
-func NewTweetService(userRepository repositories.UserRepository, tweetRepository repositories.TweetRepository) *TweetService {
+func NewTweetService(userRepository repositories.UserRepository, tweetRepository repositories.TweetRepository, dispatcher events.EventDispatcher) *TweetService {
 	return &TweetService{
 		tweetService:    services.NewTweetService(),
 		tweetRepository: tweetRepository,
 		userRepository:  userRepository,
+		dispatcher:      dispatcher,
 	}
 }

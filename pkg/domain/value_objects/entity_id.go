@@ -34,14 +34,14 @@ func NewEntityID() (*EntityID, error) {
 //	if err != nil {
 //	    log.Fatalf("failed to create entity id: %v", err)
 //	}
-func NewEntityIDFromString(id string) (EntityID, error) {
+func NewEntityIDFromString(id string) (*EntityID, error) {
 	uuid, err := uuid.Parse(id)
 
 	if err != nil {
-		return EntityID{}, ErrInvalidUUID
+		return nil, ErrInvalidUUID
 	}
 
-	return EntityID{uuid: uuid}, nil
+	return &EntityID{uuid: uuid}, nil
 }
 
 // String returns string representation of the UUID

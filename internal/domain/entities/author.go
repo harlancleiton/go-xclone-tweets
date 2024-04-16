@@ -44,7 +44,7 @@ func NewUserFromExisting(id, username string, createdAt, updatedAt time.Time, is
 	// TODO add validation
 	return &Author{
 		BaseEntity: BaseEntity{
-			id:        entityId,
+			id:        *entityId,
 			createdAt: createdAt,
 			updatedAt: updatedAt,
 		},

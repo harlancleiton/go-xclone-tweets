@@ -11,6 +11,7 @@ import (
 	grpcHandler "github.com/harlancleiton/go-tweets/handlers/grpc"
 	"github.com/harlancleiton/go-tweets/internal/application/services"
 	"github.com/harlancleiton/go-tweets/internal/infra/persistence/memory"
+	"github.com/harlancleiton/go-tweets/pkg/domain/events"
 	grpcInterceptor "github.com/harlancleiton/go-tweets/pkg/middlewares/grpc"
 	"github.com/harlancleiton/go-tweets/pkg/pb"
 	"google.golang.org/grpc"
@@ -56,7 +57,7 @@ func (s *TweetService) Create(ctx context.Context, request *pb.CreateTweetReques
 }
 
 func registerTweetServiceServer(server *grpc.Server) {
-	service := services.NewTweetService(memory.NewMemoryUserRepository(), memory.NewMemoryTweetRepository())
+	service := services.NewTweetService(memory.NewMemoryUserRepository(), memory.NewMemoryTweetRepository(), events.NewConcreteEventDispatcher())
 	pb.RegisterTweetServiceServer(server, &TweetService{
 		createHandler: grpcHandler.NewGrpcCreateTweetHandler(service),
 	})
