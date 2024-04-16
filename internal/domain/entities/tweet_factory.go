@@ -56,13 +56,14 @@ func (f *TweetFactory) CreateTweetFromEvents(events []eventsPkg.Event, author *A
 		return nil, ErrFirstEventNotCreatedTweetEvent
 	}
 
-	author, err := NewUserFromExisting(createdEvent.EventPayload().AuthorID.String(), author.Username(), author.CreatedAt(), author.UpdatedAt(), author.IsBlocked(), author.EmailVerified())
+	aId := createdEvent.EventPayload().AuthorID
+	a, err := NewUserFromExisting(aId.String(), author.Username(), author.CreatedAt(), author.UpdatedAt(), author.IsBlocked(), author.EmailVerified())
 
 	if err != nil {
 		return nil, err
 	}
 
-	t, err := NewTweetFromEvents(createdEvent, events, author, f.dispatcher)
+	t, err := NewTweetFromEvents(createdEvent, events, a, f.dispatcher)
 
 	if err != nil {
 		return nil, err

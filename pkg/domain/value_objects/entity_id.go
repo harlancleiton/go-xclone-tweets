@@ -45,16 +45,16 @@ func NewEntityIDFromString(id string) (*EntityID, error) {
 }
 
 // String returns string representation of the UUID
-func (e EntityID) String() string {
+func (e *EntityID) String() string {
 	return e.uuid.String()
 }
 
 // Equals checks if the UUID of another EntityID_equal to the UUID of the current EntityID.
-func (e EntityID) Equals(other EntityID) bool {
+func (e *EntityID) Equals(other EntityID) bool {
 	return e.uuid == other.uuid
 }
 
 // IsEmpty checks if the UUID is Nil (equivalent to an empty UUID).
-func (e EntityID) IsEmpty() bool {
+func (e *EntityID) IsEmpty() bool {
 	return e.uuid == uuid.Nil
 }

@@ -6,11 +6,6 @@ import (
 	"github.com/harlancleiton/go-tweets/internal/domain/entities"
 )
 
-type AuthorDto struct {
-	ID       string
-	Username string
-}
-
 type TweetDto struct {
 	ID        string
 	Text      string
@@ -19,14 +14,12 @@ type TweetDto struct {
 }
 
 func NewTweetDto(tweet *entities.Tweet) *TweetDto {
-	author := tweet.Author()
+	tId := tweet.ID()
+	a := tweet.Author()
 
 	return &TweetDto{
-		ID:        tweet.ID().String(),
+		ID:        tId.String(),
 		Text:      tweet.Text(),
 		CreatedAt: tweet.CreatedAt(),
-		Author: AuthorDto{
-			ID:       author.ID().String(),
-			Username: author.Username(),
-		}}
+		Author:    *NewAuthorDto(&a)}
 }

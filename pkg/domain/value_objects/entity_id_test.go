@@ -45,7 +45,7 @@ func TestEntityID_Equals(t *testing.T) {
 	eid1, _ := NewEntityIDFromString(validUUID)
 	eid2, _ := NewEntityIDFromString(validUUID)
 
-	assert.True(t, eid1.Equals(eid2))
+	assert.True(t, eid1.Equals(*eid2))
 }
 
 func TestEntityID_IsEmpty(t *testing.T) {
