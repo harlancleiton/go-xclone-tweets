@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/harlancleiton/go-tweets/internal/domain/dto"
@@ -11,14 +12,28 @@ import (
 	"github.com/harlancleiton/go-tweets/pkg/domain/events"
 )
 
+var (
+	ErrAuthorCannotTweet = errors.New("author cannot tweet")
+)
+
 type TweetService struct {
-	tweetService    *services.TweetService
-	userRepository  repositories.UserRepository
-	tweetRepository repositories.TweetRepository
-	dispatcher      events.EventDispatcher
+	userStatusService *services.UserStatusService
+	userRepository    repositories.UserRepository
+	tweetRepository   repositories.TweetRepository
+	dispatcher        events.EventDispatcher
 }
 
 func (s *TweetService) CreateTweet(username string, input *dto.CreateTweetInput) (*dto.TweetDto, error) {
+	can, err := s.userStatusService.CanPostTweet(username)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !can {
+		return nil, ErrAuthorCannotTweet
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	author, err := s.userRepository.FindByUsername(ctx, username)
@@ -29,12 +44,6 @@ func (s *TweetService) CreateTweet(username string, input *dto.CreateTweetInput)
 
 	f := entities.NewTweetFactory(s.dispatcher)
 	t, err := f.CreateNewTweet(input.Text, author)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.tweetService.Tweet(author, t)
 
 	if err != nil {
 		return nil, err
@@ -53,9 +62,9 @@ func (s *TweetService) CreateTweet(username string, input *dto.CreateTweetInput)
 
 func NewTweetService(userRepository repositories.UserRepository, tweetRepository repositories.TweetRepository, dispatcher events.EventDispatcher) *TweetService {
 	return &TweetService{
-		tweetService:    services.NewTweetService(),
-		tweetRepository: tweetRepository,
-		userRepository:  userRepository,
-		dispatcher:      dispatcher,
+		userStatusService: services.NewUserStatusService(userRepository),
+		tweetRepository:   tweetRepository,
+		userRepository:    userRepository,
+		dispatcher:        dispatcher,
 	}
 }

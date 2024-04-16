@@ -26,10 +26,6 @@ func (u *Author) EmailVerified() bool {
 	return u.emailVerified
 }
 
-func (u *Author) CanTweet() bool {
-	return !u.isBlocked && u.emailVerified
-}
-
 func (u *Author) AddTweet(tweet *Tweet) {
 	u.tweets = append(u.tweets, tweet)
 }
