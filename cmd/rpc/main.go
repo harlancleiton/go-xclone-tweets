@@ -7,11 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/golang-jwt/jwt"
 	grpcHandler "github.com/harlancleiton/go-tweets/handlers/grpc"
 	"github.com/harlancleiton/go-tweets/internal/application/services"
 	"github.com/harlancleiton/go-tweets/internal/infra/persistence/memory"
 	"github.com/harlancleiton/go-tweets/pkg/domain/events"
+	eventsKafka "github.com/harlancleiton/go-tweets/pkg/infrastruture/events"
+	"github.com/harlancleiton/go-tweets/pkg/kafka"
 	grpcInterceptor "github.com/harlancleiton/go-tweets/pkg/middlewares/grpc"
 	"github.com/harlancleiton/go-tweets/pkg/pb"
 	"google.golang.org/grpc"
@@ -19,6 +22,30 @@ import (
 
 func main() {
 	generateAccessToken()
+
+	log.Println("Starting Kafka producer...")
+	kafkaProducer, err := kafka.NewSyncProducer([]string{"localhost:9092"})
+	log.Println("Kafka producer started")
+
+	if err != nil {
+		log.Fatalf("Failed to create Kafka producer: %v", err)
+	}
+
+	defer func() {
+		if err := kafkaProducer.Close(); err != nil {
+			log.Fatalf("Failed to close Kafka producer: %v", err)
+		}
+	}()
+
+	startGrpcServer(kafkaProducer)
+}
+
+func startGrpcServer(kafkaProducer sarama.SyncProducer) {
+	kafkaProducer.SendMessage(&sarama.ProducerMessage{
+		Topic: "TweetCreated",
+		Key:   sarama.StringEncoder("Tweet"),
+		Value: sarama.StringEncoder("Hello World"),
+	})
 
 	log.Println("Starting gRPC server...")
 
@@ -28,7 +55,7 @@ func main() {
 
 	log.Println("gRPC server started")
 
-	registerTweetServiceServer(server)
+	registerTweetServiceServer(server, kafkaProducer)
 
 	log.Println("TweetService registered")
 	log.Println("All services registered")
@@ -56,8 +83,9 @@ func (s *TweetService) Create(ctx context.Context, request *pb.CreateTweetReques
 	return s.createHandler.Create(ctx, request)
 }
 
-func registerTweetServiceServer(server *grpc.Server) {
-	service := services.NewTweetService(memory.NewMemoryUserRepository(), memory.NewMemoryTweetRepository(), events.NewConcreteEventDispatcher())
+func registerTweetServiceServer(server *grpc.Server, producer sarama.SyncProducer) {
+	kafkaDispatcher := eventsKafka.NewKafkaEventDispatcher(producer, events.NewConcreteEventDispatcher())
+	service := services.NewTweetService(memory.NewMemoryUserRepository(), memory.NewMemoryTweetRepository(), kafkaDispatcher)
 	pb.RegisterTweetServiceServer(server, &TweetService{
 		createHandler: grpcHandler.NewGrpcCreateTweetHandler(service),
 	})

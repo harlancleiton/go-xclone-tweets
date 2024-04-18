@@ -7,10 +7,10 @@ import (
 )
 
 type TweetCreatedEventPayload struct {
-	Text      string
-	AuthorID  valueobjects.EntityID
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Text      string    `json:"text"`
+	AuthorID  string    `json:"author_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type TweetCreatedEvent struct {
@@ -33,7 +33,7 @@ func NewCreatedTweetEvent(entityId *valueobjects.EntityID, text string, authorID
 		ocurredAt: time.Now(),
 		payload: TweetCreatedEventPayload{
 			Text:      text,
-			AuthorID:  authorID,
+			AuthorID:  authorID.String(),
 			CreatedAt: tweetCreatedAt,
 			UpdatedAt: tweetUpdatedAt,
 		},
@@ -65,7 +65,7 @@ func FromExistingCreatedTweetEvent(id, entityId, text, authorId string, ocurredA
 		ocurredAt: ocurredAt,
 		payload: TweetCreatedEventPayload{
 			Text:     text,
-			AuthorID: *a,
+			AuthorID: a.String(),
 		},
 	}, nil
 }
@@ -78,8 +78,12 @@ func (c *TweetCreatedEvent) EntityID() valueobjects.EntityID {
 	return c.entityId
 }
 
+func (c *TweetCreatedEvent) EntityName() string {
+	return "Tweet"
+}
+
 func (c *TweetCreatedEvent) Name() string {
-	return "CreatedEvent"
+	return "TweetCreated"
 }
 
 func (c *TweetCreatedEvent) OcurredAt() time.Time {

@@ -9,6 +9,7 @@ import (
 type Event interface {
 	ID() valueobjects.EntityID
 	EntityID() valueobjects.EntityID
+	EntityName() string
 	Name() string
 	OcurredAt() time.Time
 	Payload() interface{}

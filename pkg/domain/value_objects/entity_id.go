@@ -45,7 +45,7 @@ func NewEntityIDFromString(id string) (*EntityID, error) {
 }
 
 // String returns string representation of the UUID
-func (e *EntityID) String() string {
+func (e EntityID) String() string {
 	return e.uuid.String()
 }
 
