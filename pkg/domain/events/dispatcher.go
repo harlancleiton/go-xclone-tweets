@@ -5,9 +5,13 @@ import (
 	"sync"
 )
 
-var ErrHandlerAlreadyRegistered = errors.New("handler already registered")
-var ErrHandlerNotRegistered = errors.New("handler not registered")
-var ErrHandlerNotFound = errors.New("handler not found")
+var (
+	ErrHandlerAlreadyRegistered = errors.New("handler already registered")
+	ErrHandlerNotRegistered     = errors.New("handler not registered")
+	ErrHandlerNotFound          = errors.New("handler not found")
+)
+
+const GlobalHandler = "*"
 
 type EventDispatcher interface {
 	Dispatch(event Event) error
@@ -55,11 +59,17 @@ func (d *ConcreteEventDispatcher) UnregisterHandler(eventName string, handler Ev
 }
 
 func (d *ConcreteEventDispatcher) Dispatch(event Event) error {
-	if _, ok := d.handlers[event.Name()]; !ok {
+	_, containsGlobalHandlers := d.handlers[GlobalHandler]
+	_, containsNamedHandlers := d.handlers[event.Name()]
+	if !containsNamedHandlers && !containsGlobalHandlers {
 		return ErrHandlerNotFound
 	}
 
 	wg := &sync.WaitGroup{}
+	for _, handler := range d.handlers[GlobalHandler] {
+		wg.Add(1)
+		go handler.Handle(event, wg)
+	}
 	for _, handler := range d.handlers[event.Name()] {
 		wg.Add(1)
 		go handler.Handle(event, wg)

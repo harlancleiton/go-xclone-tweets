@@ -79,7 +79,7 @@ func (s *TweetService) Create(ctx context.Context, request *pb.CreateTweetReques
 
 func registerTweetServiceServer(server *grpc.Server, producer sarama.SyncProducer) {
 	dispatcher := events.NewConcreteEventDispatcher()
-	dispatcher.RegisterHandler(events.ListenAllEvents, eventsKafka.NewKafkaEventHandler(producer))
+	dispatcher.RegisterHandler(events.GlobalHandler, eventsKafka.NewKafkaEventHandler(producer))
 	service := services.NewTweetService(memory.NewMemoryUserRepository(), memory.NewMemoryTweetRepository(), dispatcher)
 	pb.RegisterTweetServiceServer(server, &TweetService{
 		createHandler: grpcHandler.NewGrpcCreateTweetHandler(service),
