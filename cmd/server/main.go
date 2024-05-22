@@ -41,12 +41,6 @@ func main() {
 }
 
 func startGrpcServer(kafkaProducer sarama.SyncProducer) {
-	kafkaProducer.SendMessage(&sarama.ProducerMessage{
-		Topic: "TweetCreated",
-		Key:   sarama.StringEncoder("Tweet"),
-		Value: sarama.StringEncoder("Hello World"),
-	})
-
 	log.Println("Starting gRPC server...")
 
 	authInterceptor := grpcInterceptor.NewAuthInterceptor(memory.NewMemoryUserRepository())
@@ -84,8 +78,9 @@ func (s *TweetService) Create(ctx context.Context, request *pb.CreateTweetReques
 }
 
 func registerTweetServiceServer(server *grpc.Server, producer sarama.SyncProducer) {
-	kafkaDispatcher := eventsKafka.NewKafkaEventDispatcher(producer, events.NewConcreteEventDispatcher())
-	service := services.NewTweetService(memory.NewMemoryUserRepository(), memory.NewMemoryTweetRepository(), kafkaDispatcher)
+	dispatcher := events.NewConcreteEventDispatcher()
+	dispatcher.RegisterHandler(events.ListenAllEvents, eventsKafka.NewKafkaEventHandler(producer))
+	service := services.NewTweetService(memory.NewMemoryUserRepository(), memory.NewMemoryTweetRepository(), dispatcher)
 	pb.RegisterTweetServiceServer(server, &TweetService{
 		createHandler: grpcHandler.NewGrpcCreateTweetHandler(service),
 	})
@@ -93,7 +88,7 @@ func registerTweetServiceServer(server *grpc.Server, producer sarama.SyncProduce
 
 func generateAccessToken() {
 	claims := jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
+		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
 		Issuer:    "tweets",
 		Subject:   "somebody",
 		Audience:  strings.Join(([]string{"somebody_else"}), ", "),
