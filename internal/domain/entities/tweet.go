@@ -43,8 +43,8 @@ func NewTweetFromEvents(createdEvent *tweetEvents.TweetCreatedEvent, remainingEv
 	t := &Tweet{
 		BaseEntity: BaseEntity{
 			id:         createdEvent.EntityID(),
-			createdAt:  createdEvent.EventPayload().CreatedAt,
-			updatedAt:  createdEvent.EventPayload().UpdatedAt,
+			createdAt:  createdEvent.OcurredAt(),
+			updatedAt:  createdEvent.OcurredAt(),
 			dispatcher: dispatcher,
 			version:    1,
 			events:     []events.Event{},
@@ -72,15 +72,28 @@ func (t *Tweet) Author() Author {
 	return t.author
 }
 
+func (t *Tweet) ChangeText(text string) error {
+	e, err := tweetEvents.NewChangedTweetTextEvent(t.ID(), t.text, text)
+
+	if err != nil {
+		return err
+	}
+
+	return t.apply(e)
+}
+
 func (t *Tweet) apply(event events.Event) error {
 	t.events = append(t.events, event)
 
-	// switch e := event.(type) {
-	// case *tweetEvents.CreatedTweetEvent:
-	// 	//
-	// default:
-	// 	return ErrUnknownEvent
-	// }
+	switch e := event.(type) {
+	case *tweetEvents.TweetCreatedEvent:
+		t.text = e.EventPayload().Text
+	case *tweetEvents.TweetChangedTextEvent:
+		t.text = e.EventPayload().NewText
+		t.updatedAt = e.OcurredAt()
+	default:
+		return ErrUnknownEvent
+	}
 
-	return nil
+	return ErrUnknownEvent
 }

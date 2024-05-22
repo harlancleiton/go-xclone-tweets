@@ -7,10 +7,8 @@ import (
 )
 
 type TweetCreatedEventPayload struct {
-	Text      string    `json:"text"`
-	AuthorID  string    `json:"author_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Text     string `json:"text"`
+	AuthorID string `json:"author_id"`
 }
 
 type TweetCreatedEvent struct {
@@ -32,10 +30,8 @@ func NewCreatedTweetEvent(entityId *valueobjects.EntityID, text string, authorID
 		entityId:  *entityId,
 		ocurredAt: time.Now(),
 		payload: TweetCreatedEventPayload{
-			Text:      text,
-			AuthorID:  authorID.String(),
-			CreatedAt: tweetCreatedAt,
-			UpdatedAt: tweetUpdatedAt,
+			Text:     text,
+			AuthorID: authorID.String(),
 		},
 	}, nil
 }
